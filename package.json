@@ -1,0 +1,24 @@
+{
+  "name": "@ralphwetzel/node-red-mcu-heartbeat",
+  "version": "0.0.1",
+  "description": "Node to monitor & display the connection status between a flow & the MCU",
+  "main": "heartbeat.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ralphwetzel/node-red-mcu-heartbeat.git"
+  },
+  "keywords": [
+    "Node-RED",
+    "node-red-mcu",
+    "node-red-mcu-plugin"
+  ],
+  "author": "Ralph Wetzel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ralphwetzel/node-red-mcu-heartbeat/issues"
+  },
+  "homepage": "https://github.com/ralphwetzel/node-red-mcu-heartbeat#readme"
+}
