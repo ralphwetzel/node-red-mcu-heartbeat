@@ -1,0 +1,12 @@
+{
+	"include": [
+	],
+	"modules": {
+		"*": [
+			"./heartbeat"
+		]
+	},
+	"preload": [
+		"heartbeat"
+	]
+}

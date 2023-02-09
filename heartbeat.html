@@ -1,67 +1,89 @@
 <!--
-    This code is based on 20-inject.html
-
-     * Copyright JS Foundation and other contributors, http://js.foundation
-     *
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     * http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
+    This code is based on
+    
+        * 20-inject.html
+        * Copyright JS Foundation and other contributors, http://js.foundation
+        *
+        * Licensed under the Apache License, Version 2.0 (the "License");
+        * you may not use this file except in compliance with the License.
+        * You may obtain a copy of the License at
+        *
+        * http://www.apache.org/licenses/LICENSE-2.0
+        *
+        * Unless required by applicable law or agreed to in writing, software
+        * distributed under the License is distributed on an "AS IS" BASIS,
+        * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        * See the License for the specific language governing permissions and
+        * limitations under the License.
 
     Adaptations to node-red-mcu-heartbeat by @ralphwetzel
+    Copyright 2022 - 2023 Ralph Wetzel
     https://github.com/ralphwetzel/node-red-mcu-heartbeat
     License: MIT
 -->
 
-<script type="text/html" data-template-name="heartbeat">
+<script type="text/html" data-template-name="mcu-heartbeat">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-heartbeat"><i class="fa fa-heartbeat"></i> Heartbeat</label>
+        <input type="checkbox" id="node-input-heartbeat" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span>Check connection to MCU every</span>&nbsp;
+        <input type="text" id="node-input-pulse" placeholder="5" style="width:45px; height:28px;">&nbsp;
+        <span>seconds.</span>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-launch"></label>
+        <input type="checkbox" id="node-input-launch" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span>Signal flow launch on second output.</span>
+
+        <input type="hidden" id="node-input-outputs">
+
     </div>
 
     <div class="form-row node-input-property-container-row">
+        <label for="node-input-property-container" style="width: 150px"><i class="fa fa-tag"></i> Inject Configuration</span></label>
         <ol id="node-input-property-container"></ol>
     </div>
 
     <div class="form-row" id="node-once">
         <label for="node-input-once">&nbsp;</label>
         <input type="checkbox" id="node-input-once" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span data-i18n="heartbeat.onstart"></span>&nbsp;
+        <span data-i18n="node-red:inject.onstart"></span>&nbsp;
         <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:45px; height:28px;">&nbsp;
-        <span data-i18n="heartbeat.onceDelay"></span>
+        <span data-i18n="node-red:inject.onceDelay"></span>
     </div>
 
     <div class="form-row">
-        <label for=""><i class="fa fa-repeat"></i> <span data-i18n="heartbeat.label.repeat"></span></label>
+        <label for=""><i class="fa fa-repeat"></i> <span data-i18n="node-red:inject.label.repeat"></span></label>
         <select id="heartbeat-time-type-select">
-            <option value="none" data-i18n="heartbeat.none"></option>
-            <option value="interval" data-i18n="heartbeat.interval"></option>
-            <option value="interval-time" data-i18n="heartbeat.interval-time"></option>
-            <option value="time" data-i18n="heartbeat.time"></option>
+            <option value="none" data-i18n="node-red:inject.none"></option>
+            <option value="interval" data-i18n="node-red:inject.interval"></option>
+<!--
+            <option value="interval-time" data-i18n="node-red:inject.interval-time"></option>
+            <option value="time" data-i18n="node-red:inject.time"></option>
+-->
         </select>
         <input type="hidden" id="node-input-repeat">
         <input type="hidden" id="node-input-crontab">
     </div>
 
     <div class="form-row heartbeat-time-row hidden" id="heartbeat-time-row-interval">
-        <span data-i18n="heartbeat.every"></span>
-        <input id="heartbeat-time-interval-count" class="heartbeat-time-count" value="1"></input>
+        <span data-i18n="node-red:inject.every"></span>
+        <input id="heartbeat-time-interval-count" class="heartbeat-time-count" value="1">
         <select style="width:100px" id="heartbeat-time-interval-units">
-            <option value="s" data-i18n="heartbeat.seconds"></option>
-            <option value="m" data-i18n="heartbeat.minutes"></option>
-            <option value="h" data-i18n="heartbeat.hours"></option>
+            <option value="s" data-i18n="node-red:inject.seconds"></option>
+            <option value="m" data-i18n="node-red:inject.minutes"></option>
+            <option value="h" data-i18n="node-red:inject.hours"></option>
         </select><br/>
     </div>
 
     <div class="form-row heartbeat-time-row hidden" id="heartbeat-time-row-interval-time">
-        <span data-i18n="heartbeat.every"></span> <select style="width:90px; margin-left:20px;" id="heartbeat-time-interval-time-units" class="heartbeat-time-int-count" value="1">
+        <span data-i18n="node-red:inject.every"></span> <select style="width:90px; margin-left:20px;" id="heartbeat-time-interval-time-units" class="heartbeat-time-int-count" value="1">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -74,46 +96,46 @@
             <option value="20">20</option>
             <option value="30">30</option>
             <option value="0">60</option>
-        </select> <span data-i18n="heartbeat.minutes"></span><br/>
-        <span data-i18n="heartbeat.between"></span> <select id="heartbeat-time-interval-time-start" class="heartbeat-time-times"></select>
-        <span data-i18n="heartbeat.and"></span> <select id="heartbeat-time-interval-time-end" class="heartbeat-time-times"></select><br/>
+        </select> <span data-i18n="node-red:inject.minutes"></span><br/>
+        <span data-i18n="node-red:inject.between"></span> <select id="heartbeat-time-interval-time-start" class="heartbeat-time-times"></select>
+        <span data-i18n="node-red:inject.and"></span> <select id="heartbeat-time-interval-time-end" class="heartbeat-time-times"></select><br/>
         <div id="heartbeat-time-interval-time-days" class="heartbeat-time-days" style="margin-top:5px">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="heartbeat.on">on</div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red:inject.on">on</div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="heartbeat.days.0"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="heartbeat.days.1"></span></label>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="heartbeat.days.2"></span></label>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red:inject.days.0"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red:inject.days.1"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red:inject.days.2"></span></label>
                 </div>
                 <div>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="heartbeat.days.3"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="heartbeat.days.4"></span></label>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="heartbeat.days.5"></span></label>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red:inject.days.3"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red:inject.days.4"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red:inject.days.5"></span></label>
                 </div>
                 <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="heartbeat.days.6"></span></label>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red:inject.days.6"></span></label>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="form-row heartbeat-time-row hidden" id="heartbeat-time-row-time">
-        <span data-i18n="heartbeat.at"></span> <input type="text" id="heartbeat-time-time" value="12:00"></input><br/>
+        <span data-i18n="node-red:inject.at"></span> <input type="text" id="heartbeat-time-time" value="12:00"><br/>
         <div id="heartbeat-time-time-days" class="heartbeat-time-days">
-            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="heartbeat.on"></div>
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="node-red:inject.on"></div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="heartbeat.days.0"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="heartbeat.days.1"></span></label>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="heartbeat.days.2"></span></label>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="node-red:inject.days.0"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="node-red:inject.days.1"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="node-red:inject.days.2"></span></label>
                 </div>
                 <div>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="heartbeat.days.3"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="heartbeat.days.4"></span></label>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="heartbeat.days.5"></span></label>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="node-red:inject.days.3"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="node-red:inject.days.4"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="node-red:inject.days.5"></span></label>
                 </div>
                 <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="heartbeat.days.6"></span></label>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="node-red:inject.days.6"></span></label>
                 </div>
             </div>
         </div>
@@ -157,6 +179,24 @@
 <script type="text/javascript">
 (function() {
 
+    const heartbeat_status = {
+        idle: {
+            text: "idle",
+            shape: "ring",
+            fill: "grey"
+        },
+        connected: {
+            text: "connected",
+            shape: "dot",
+            fill: "green"
+        },
+        lost: {
+            text: "disconnected",
+            shape: "dot",
+            fill: "red"
+        }
+    }
+    
     function resizeDialog(size) {
         size = size || { height: $(".red-ui-tray-content form").height() }
         var rows = $("#dialog-form>div:not(.node-input-property-container-row):visible");
@@ -166,7 +206,7 @@
         }
         var editorRow = $("#dialog-form>div.node-input-property-container-row");
         height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-        height += 16;
+        // height += 16;
         $("#node-input-property-container").editableList('height',height);
     }
     /** Retrieve editableList items (refactored for re-use in the form heartbeat button)*/
@@ -198,8 +238,8 @@
         });
         return result;
     }
-    /** Perform heartbeat, optionally sending a custom msg (refactored for re-use in the form heartbeat button)*/
-    function doheartbeat(node, customMsg) {
+    /** Perform inject, optionally sending a custom msg (refactored for re-use in the form inject button)*/
+    function doinject(node, customMsg) {
         var label = node._def.label.call(node,customMsg?customMsg.__user_heartbeat_props__:undefined);
         if (label.length > 30) {
             label = label.substring(0, 50) + "...";
@@ -211,24 +251,24 @@
             data: JSON.stringify(customMsg||{}),
             contentType: "application/json; charset=utf-8",
             success: function (resp) {
-                RED.notify(node._("heartbeat.success", { label: label }), { type: "success", id: "heartbeat", timeout: 2000 });
+                RED.notify(node._("node-red:inject.success", { label: label }), { type: "success", id: "heartbeat", timeout: 2000 });
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 if (jqXHR.status == 404) {
-                    RED.notify(node._("common.notification.error", { message: node._("common.notification.errors.not-deployed") }), "error");
+                    RED.notify(node._("node-red:common.notification.error", { message: node._("node-red:common.notification.errors.not-deployed") }), "error");
                 } else if (jqXHR.status == 500) {
-                    RED.notify(node._("common.notification.error", { message: node._("heartbeat.errors.failed") }), "error");
+                    RED.notify(node._("node-red:common.notification.error", { message: node._("node-red:inject.errors.failed") }), "error");
                 } else if (jqXHR.status == 0) {
-                    RED.notify(node._("common.notification.error", { message: node._("common.notification.errors.no-response") }), "error");
+                    RED.notify(node._("node-red:common.notification.error", { message: node._("node-red:common.notification.errors.no-response") }), "error");
                 } else {
-                    RED.notify(node._("common.notification.error", { message: node._("common.notification.errors.unexpected", { status: jqXHR.status, message: textStatus }) }), "error");
+                    RED.notify(node._("node-red:common.notification.error", { message: node._("node-red:common.notification.errors.unexpected", { status: jqXHR.status, message: textStatus }) }), "error");
                 }
             }
         });
     }
-    RED.nodes.registerType('heartbeat',{
-        category: 'common',
-        color:"#a6bbcf",
+    RED.nodes.registerType('mcu-heartbeat',{
+        category: 'MCU',
+        color:"#7090c9",
         defaults: {
             name: {value:""},
             props:{value:[{p:"payload"},{p:"topic",vt:"str"}], validate:function(v, opt) {
@@ -236,21 +276,21 @@
                     for (var i=0;i<v.length;i++) {
                         if (/msg|flow|global/.test(v[i].vt)) {
                             if (!RED.utils.validatePropertyExpression(v[i].v)) {
-                                return RED._("node-red:heartbeat.errors.invalid-prop", { prop: 'msg.'+v[i].p, error: v[i].v });
+                                return RED._("node-red:inject.errors.invalid-prop", { prop: 'msg.'+v[i].p, error: v[i].v });
                             }
                         } else if (v[i].vt === "jsonata") {
                             try{ jsonata(v[i].v); }
                             catch(e){
-                                return RED._("node-red:heartbeat.errors.invalid-jsonata", { prop: 'msg.'+v[i].p, error: e.message });
+                                return RED._("node-red:inject.errors.invalid-jsonata", { prop: 'msg.'+v[i].p, error: e.message });
                             }
                         } else if (v[i].vt === "json") {
                             try{ JSON.parse(v[i].v); }
                             catch(e){
-                                return RED._("node-red:heartbeat.errors.invalid-json", { prop: 'msg.'+v[i].p, error: e.message });
+                                return RED._("node-red:inject.errors.invalid-json", { prop: 'msg.'+v[i].p, error: e.message });
                             }
                         } else if (v[i].vt === "num"){
                             if (!/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/.test(v[i].v)) {
-                                return RED._("node-red:heartbeat.errors.invalid-prop", { prop: 'msg.'+v[i].p, error: v[i].v });
+                                return RED._("node-red:inject.errors.invalid-prop", { prop: 'msg.'+v[i].p, error: v[i].v });
                             }
                         }
                     }
@@ -264,7 +304,7 @@
                          (v >= 0) && (v <= 2147483))) {
                         return true;
                     }
-                    return RED._("node-red:heartbeat.errors.invalid-repeat");
+                    return RED._("node-red:inject.errors.invalid-repeat");
                 }
             },
             crontab: {value:""},
@@ -273,8 +313,13 @@
             topic: {value:""},
             payload: {value:"", validate: RED.validators.typedInput("payloadType", false) },
             payloadType: {value:"date"},
+            // heartbeat
+            heartbeat: {value: true},
+            pulse: {value: 5},
+            launch: {value: true},
+            outputs: {value:1}
         },
-        icon: "heartbeat.svg",
+        icon: 'font-awesome/fa-heartbeat',
         inputs:0,
         outputs:1,
         outputLabels: function(index) {
@@ -313,7 +358,7 @@
                             propType = "invalid";
                         }
                     }
-                    lab += this._("heartbeat.label."+propType);
+                    lab += this._("node-red:inject.label."+propType);
                 }
             }
             return lab;
@@ -358,21 +403,22 @@
                 } else if (payload.length > 0 && payload.length < 24) {
                     return payload+suffix;
                 } else {
-                    return this._("heartbeat.heartbeat")+suffix;
+                    return this._("node-red:inject.inject")+suffix;
                 }
             } else if (payloadType === 'date' || payloadType === 'bin' || payloadType === 'env') {
                 if ((topic !== "") && (topic.length <= 16)) {
-                    return topic + ":" + this._('heartbeat.label.'+payloadType)+suffix;
+                    return topic + ":" + this._('node-red:inject.label.'+payloadType)+suffix;
                 } else {
-                    return this._('heartbeat.label.'+payloadType)+suffix;
+                    return this._('node-red:inject.label.'+payloadType)+suffix;
                 }
             } else if (payloadType === 'flow' || payloadType === 'global') {
                 var key = RED.utils.parseContextKey(payload);
                 return payloadType+"."+key.key+suffix;
             } else {
-                return this._("heartbeat.heartbeat")+suffix;
+                return this._("node-red:inject.inject")+suffix;
             }
         },
+        paletteLabel: "heartbeat",
         labelStyle: function() {
             return this.name?"node_label_italic":"";
         },
@@ -525,16 +571,20 @@
 
             eList.editableList({
                 buttons: [
-                    {
-                        id: "node-heartbeat-test-heartbeat-button",
-                        label: node._("heartbeat.heartbeatNow"),
-                        click: function(e) {
-                            var items = eList.editableList('items');
-                            var props = getProps(items);
-                            var m = {__user_heartbeat_props__: props.props};
-                            doheartbeat(node, m);
-                        }
-                    }
+                    
+                    // *** ToDo: Investigate if possible to implement for mcu
+                    
+                    // {
+                    //     id: "node-heartbeat-test-heartbeat-button",
+                    //     label: node._("node-red:inject.injectNow"),
+                    //     click: function(e) {
+                    //         var items = eList.editableList('items');
+                    //         var props = getProps(items);
+                    //         var m = {__user_heartbeat_props__: props.props};
+                    //         doinject(node, m);
+                    //     }
+                    // }
+
                 ],
                 addItem: function(container,i,opt) {
                     var prop = opt;
@@ -711,19 +761,204 @@
             if(result.hasOwnProperty('payloadType')) { this.payloadType = result.payloadType; };
             if(result.hasOwnProperty('payload')) { this.payload = result.payload; };
             if(result.hasOwnProperty('topic')) { this.topic = result.topic; };
+
+            // heartbeat
+            {
+                let outs = ($("#node-input-launch").prop('checked') == true) ? 2 : 1;
+                if (this.outputs !== outs) {
+                    $("#node-input-outputs").val(outs);
+                }
+            }
         },
         button: {
             enabled: function() {
-                return !this.changed
+                return (this.connected === true);
             },
             onclick: function () {
-                if (this.changed) {
-                    return RED.notify(RED._("notification.warning", { message: RED._("notification.warnings.undeployedChanges") }), "warning");
+                if (this.connected) {
+
+                    $.ajax({
+                        url: "heartbeat/" + this.id,
+                        type: "POST",
+                        data: JSON.stringify({}),
+                        contentType: "application/json; charset=utf-8",
+                        success: function (resp) {
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                        }
+                    });
+
+
                 }
-                doheartbeat(this);
             }
+        },
+        // get status() {
+        //     return this._status;
+        // },
+        // set status(s) {
+
+        //     console.log("@get status: " + s);
+
+        //     let node = this;
+        //     node._status = s;
+
+        //     // The MCU will regularly update the status with "green / connected".
+        //     // We take this as an indicator that we're connected.
+        //     // The ping_timer resets this to "Lost" & later "Idle" in case no updat arrives.
+
+        //     if (s?.fill == "green") {
+        //         node.connected = true;
+        //         // node.animation_status = msg;
+
+        //         if (node.ping_timer) {
+        //             clearTimeout(node.ping_timer);
+        //         }
+
+        //         node.ping_timer = setTimeout(() => {
+
+        //             node.ping_timer = setTimeout(() => {
+        //                 node.connected = false;
+        //                 node.status = heartbeat_status.idle;
+        //                 node.dirtyStatus = true;
+        //                 node.dirty = true;
+        //                 RED.view.redraw();
+        //             }, 5000);
+
+        //             node.connected = false;
+        //             node.status = heartbeat_status.lost;
+        //             node.dirtyStatus = true;
+        //             node.dirty = true;
+        //             RED.view.redraw();
+
+        //         }, (node.pulse * 1000) + 1000);
+
+        //     }
+
+        // },
+        onadd: function() {
+            this.connected = false;
+            this.status = heartbeat_status.idle;
+
         },
         oneditresize: resizeDialog
     });
+
+    // RED.events.on('nodes:add', function(n) {
+
+    //     if (n.type === "mcu-heartbeat") {
+
+    //         let node = n;
+
+    //         delete n.status;
+
+    //         Object.defineProperty(node, "status", {
+
+    //             get() {
+    //                 return node._status;
+    //             },
+    //             set(s) {
+
+    //                 console.log("@set status: " + s);
+
+    //                 node._status = s;
+
+    //                 // The MCU will regularly update the status with "green / connected".
+    //                 // We take this as an indicator that we're connected.
+    //                 // The ping_timer resets this to "Lost" & later "Idle" in case no further update arrives.
+
+    //                 if (s?.fill == "green") {
+    //                     node.connected = true;
+    //                     // node.animation_status = msg;
+
+    //                     if (node.ping_timer) {
+    //                         clearTimeout(node.ping_timer);
+    //                     }
+
+    //                     node.ping_timer = setTimeout(() => {
+
+    //                         node.ping_timer = setTimeout(() => {
+    //                             node.connected = false;
+    //                             node.status = heartbeat_status.idle;
+    //                             node.dirtyStatus = true;
+    //                             node.dirty = true;
+    //                             RED.view.redraw();
+    //                         }, 5000);
+
+    //                         node.connected = false;
+    //                         node.status = heartbeat_status.lost;
+    //                         node.dirtyStatus = true;
+    //                         node.dirty = true;
+    //                         RED.view.redraw();
+
+    //                     }, (node.pulse * 1000) + 1000);
+
+    //                 } else {
+    //                     node.connected = false
+    //                 }
+    //                 RED.view.redraw();
+    //             }
+    //         });
+
+    //         console.log(n);
+
+    //     }
+    // });
+
+    RED.comms.subscribe("status/#", function (topic, msg) {
+        var parts = topic.split("/");
+        var node = RED.nodes.node(parts[1]);
+        if (node && node.type == "mcu-heartbeat") {
+            
+            // The MCU will regularly update the status with "green / connected".
+            // We take this as an indicator that we're connected.
+            // The ping_timer resets this to "Lost" & later "Idle" in case no further update arrives.
+            
+            if (msg?.fill == "green") {
+                node.connected = true;
+                // node.animation_status = msg;
+
+                if (node.ping_timer) {
+                    clearTimeout(node.ping_timer);
+                }
+
+                node.ping_timer = setTimeout(() => {
+
+                    node.ping_timer = setTimeout(() => {
+                        node.connected = false;
+                        node.status = heartbeat_status.idle;
+                        node.dirtyStatus = true;
+                        node.dirty = true;
+                        RED.view.redraw();
+                    }, 5000);
+
+                    node.connected = false;
+                    node.status = heartbeat_status.lost;
+                    node.dirtyStatus = true;
+                    node.dirty = true;
+                    RED.view.redraw();
+
+                }, (node.pulse * 1000) + 1000);
+
+                // if (node.animation_timer) {
+                //     clearTimeout(node.animation_timer);
+                // }
+                // node.animation_status.shape = "ring";
+
+                // node.animation_timer = setInterval(() => {
+                //     node.animation_status.shape = node.animation_status.shape == "ring" ? "dot" : "ring";
+                //     node.status = msg;
+                //     node.dirtyStatus = true;
+                //     node.dirty = true;
+                //     RED.view.redraw();
+                // }, 1000);
+
+            } else {
+                node.connected = false;
+            }
+
+            RED.view.redraw();
+        }
+    });
+    
 })();
 </script>

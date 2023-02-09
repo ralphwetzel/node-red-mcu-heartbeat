@@ -1,179 +1,86 @@
 /*
-    This code is based on 20-inject.js
-
-     * Copyright JS Foundation and other contributors, http://js.foundation
-     *
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     * http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-
-    Adaptations to node-red-mcu-heartbeat by @ralphwetzel
+    node-red-mcu-heartbeat by @ralphwetzel
+    Copyright 2022 - 2023 Ralph Wetzel
     https://github.com/ralphwetzel/node-red-mcu-heartbeat
     License: MIT
 */
 
+const clone = require("clone");
 
 module.exports = function(RED) {
     "use strict";
-    const {scheduleTask} = require("cronosjs");
 
     function heartbeatNode(n) {
         RED.nodes.createNode(this,n);
+        let node = this;
 
-        /* Handle legacy */
-        if(!Array.isArray(n.props)){
-            n.props = [];
-            n.props.push({
-                p:'payload',
-                v:n.payload,
-                vt:n.payloadType
-            });
-            n.props.push({
-                p:'topic',
-                v:n.topic,
-                vt:'str'
-            });
-        } else {
-            for (var i=0,l=n.props.length; i<l; i++) {
-                if (n.props[i].p === 'payload' && !n.props[i].hasOwnProperty('v')) {
-                    n.props[i].v = n.payload;
-                    n.props[i].vt = n.payloadType;
-                } else if (n.props[i].p === 'topic' && n.props[i].vt === 'str' && !n.props[i].hasOwnProperty('v')) {
-                    n.props[i].v = n.topic;
-                }
-            }
-        }
-
-        this.props = n.props;
-        this.repeat = n.repeat;
-        this.crontab = n.crontab;
-        this.once = n.once;
-        this.onceDelay = (n.onceDelay || 0.1) * 1000;
-        this.interval_id = null;
-        this.cronjob = null;
-        var node = this;
-
-        node.props.forEach(function (prop) {
-            if (prop.vt === "jsonata") {
-                try {
-                    var val = prop.v ? prop.v : "";
-                    prop.exp = RED.util.prepareJSONataExpression(val, node);
-                }
-                catch (err) {
-                    node.error(RED._("heartbeat.errors.invalid-expr", {error:err.message}));
-                    prop.exp = null;
-                }
-            }
+        // necessary to initialize status in editor
+        // all following updates are done by the MCU & processed on client side!
+        node.status({
+            text: "idle",
+            shape: "ring",
+            fill: "grey"
         });
 
-        if (node.repeat > 2147483) {
-            node.error(RED._("heartbeat.errors.toolong", this));
-            delete node.repeat;
-        }
+        node.on("input", function(msg, send, done) {
 
-        node.repeaterSetup = function () {
-            if (this.repeat && !isNaN(this.repeat) && this.repeat > 0) {
-                this.repeat = this.repeat * 1000;
-                this.debug(RED._("heartbeat.repeat", this));
-                this.interval_id = setInterval(function() {
-                    node.emit("input", {});
-                }, this.repeat);
-            } else if (this.crontab) {
-                this.debug(RED._("heartbeat.crontab", this));
-                this.cronjob = scheduleTask(this.crontab,() => { node.emit("input", {})});
+            if (this.injector) {
+                node.__getProxy?.()?.send2mcu("inject", this.z, this.injector);
             }
-        };
 
-        if (this.once) {
-            this.onceTimeout = setTimeout( function() {
-                node.emit("input",{});
-                node.repeaterSetup();
-            }, this.onceDelay);
-        } else {
-            node.repeaterSetup();
-        }
-
-        this.on("input", function(msg, send, done) {
-            var errors = [];
-            var props = this.props;
-            if (msg.__user_heartbeat_props__ && Array.isArray(msg.__user_heartbeat_props__)) {
-                props = msg.__user_heartbeat_props__;
-            }
-            delete msg.__user_heartbeat_props__;
-            props.forEach(p => {
-                var property = p.p;
-                var value = p.v ? p.v : '';
-                var valueType = p.vt ? p.vt : 'str';
-
-                if (!property) return;
-
-                if (valueType === "jsonata") {
-                    if (p.v) {
-                        try {
-                            var exp = RED.util.prepareJSONataExpression(p.v, node);
-                            var val = RED.util.evaluateJSONataExpression(exp, msg);
-                            RED.util.setMessageProperty(msg, property, val, true);
-                        }
-                        catch  (err) {
-                            errors.push(err.message);
-                        }
-                    }
-                    return;
-                }
-                try {
-                    RED.util.setMessageProperty(msg,property,RED.util.evaluateNodeProperty(value, valueType, this, msg),true);
-                } catch (err) {
-                    errors.push(err.toString());
-                }
-            });
-
-            if (errors.length) {
-                done(errors.join('; '));
-            } else {
-                send(msg);
-                done();
-            }
+            done();
+            return;
         });
+
+        node.on("mcu:plugin:build:prepare", function(n, nodes) {
+
+            // console.log(nodes);
+
+            // crate shadow inject node - only active on mcu
+            let inject = clone(n);
+
+            delete inject.heartbeat;
+            delete inject.pulse;
+            delete inject.launch;
+
+            inject.id = RED.util.generateId(),
+            inject.type = "inject";
+            inject.name = "mcu_heartbeat_injector";
+            inject.outputs = 1;
+            inject.wires = [[n.id]];
+
+            // delete all inject node relevant properties
+            // from mcu-heartbeat
+            delete n.props
+            delete n.repeat
+            delete n.crontab
+            delete n.once
+            delete n.onceDelay
+            delete n.topic
+            delete n.payload
+            delete n.payloadType
+
+            // the runtime node needs to know who's doing the inject
+            node.injector = inject.id;
+
+            // add the additional node to the nodes array...
+            nodes.push(inject);
+            // console.log(nodes);
+        });
+
     }
 
-    RED.nodes.registerType("heartbeat",heartbeatNode);
-
-    heartbeatNode.prototype.close = function() {
-        if (this.onceTimeout) {
-            clearTimeout(this.onceTimeout);
-        }
-        if (this.interval_id != null) {
-            clearInterval(this.interval_id);
-        } else if (this.cronjob != null) {
-            this.cronjob.stop();
-            delete this.cronjob;
-        }
-    };
+    RED.nodes.registerType("mcu-heartbeat",heartbeatNode);
+    registerMCUModeType("mcu-heartbeat", "mcu-heartbeat");
 
     RED.httpAdmin.post("/heartbeat/:id", RED.auth.needsPermission("heartbeat.write"), function(req,res) {
         var node = RED.nodes.getNode(req.params.id);
         if (node != null) {
-            try {
-                if (req.body && req.body.__user_heartbeat_props__) {
-                    node.receive(req.body);
-                } else {
-                    node.receive();
-                }
-                res.sendStatus(200);
-            } catch(err) {
-                res.sendStatus(500);
-                node.error(RED._("heartbeat.failed",{error:err.toString()}));
-            }
+            node.receive();
+            res.sendStatus(200);
         } else {
             res.sendStatus(404);
         }
     });
+
 }
