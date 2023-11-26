@@ -23,11 +23,7 @@ module.exports = function(RED) {
         });
 
         node.on("input", function(msg, send, done) {
-
-            if (this.injector) {
-                node.__getProxy?.()?.send2mcu("inject", this.z, this.injector);
-            }
-
+            node.__getProxy?.()?.send2mcu("inject", node.z, node.id);
             done();
             return;
         });
@@ -60,8 +56,8 @@ module.exports = function(RED) {
             delete n.payload
             delete n.payloadType
 
-            // the runtime node needs to know who's doing the inject
-            node.injector = inject.id;
+            // mcu-heartbeat needs to know whom to delegate the inject
+            n.injector = inject.id;
 
             // add the additional node to the nodes array...
             nodes.push(inject);

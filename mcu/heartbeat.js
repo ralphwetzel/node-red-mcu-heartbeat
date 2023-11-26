@@ -36,18 +36,36 @@ class mcuHeartbeat extends Node {
             }, 100);
         }
 
+        self.injector = config.injector;
         self.triggerLabel = config.triggerLabel;
     }
 
     onMessage(msg, done) {
-        trace.left(JSON.stringify({
-            state: "notify", 
-            type: "success", 
-            label: "Successfully injected: " + this.triggerLabel
-        }), "NR_EDITOR");        
         this.send(msg);
         done();
     }
+
+	onCommand(options) {
+		if ("inject" === options.command) {
+            let n = RED.nodes.getNode(this.injector);
+            if (n) {
+                try {
+                    n.trigger();
+                    trace.left(JSON.stringify({
+                        state: "notify", 
+                        type: "success", 
+                        label: "Successfully injected: " + this.triggerLabel
+                    }), "NR_EDITOR");                
+                } catch {
+                    trace.left(JSON.stringify({
+                        state: "notify", 
+                        type: "error", 
+                        label: "Failed to inject: " + this.triggerLabel
+                    }), "NR_EDITOR");                
+                }
+            }
+        }
+	}
 
     static {
         RED.nodes.registerType(this.type, this);
