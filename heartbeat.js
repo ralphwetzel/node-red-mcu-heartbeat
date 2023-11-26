@@ -43,7 +43,7 @@ module.exports = function(RED) {
             delete inject.pulse;
             delete inject.launch;
 
-            inject.id = RED.util.generateId(),
+            inject.id = node.injector || RED.util.generateId(),
             inject.type = "inject";
             inject.name = "mcu_heartbeat_injector";
             inject.outputs = 1;
