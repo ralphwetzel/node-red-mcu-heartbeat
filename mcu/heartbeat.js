@@ -35,9 +35,16 @@ class mcuHeartbeat extends Node {
                 ])
             }, 100);
         }
+
+        self.triggerLabel = config.triggerLabel;
     }
 
     onMessage(msg, done) {
+        trace.left(JSON.stringify({
+            state: "notify", 
+            type: "success", 
+            label: "Successfully injected: " + this.triggerLabel
+        }), "NR_EDITOR");        
         this.send(msg);
         done();
     }

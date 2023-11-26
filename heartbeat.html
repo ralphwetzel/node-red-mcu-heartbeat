@@ -141,6 +141,9 @@
         </div>
     </div>
 
+    <div class="form-row heartbeat-time-row hidden">
+        <input type="hidden" id="node-input-triggerLabel">
+    </div>
 </script>
 <style>
     .heartbeat-time-row {
@@ -317,7 +320,8 @@
             heartbeat: {value: true},
             pulse: {value: 5},
             launch: {value: true},
-            outputs: {value:1}
+            outputs: {value: 1},
+            triggerLabel: {value: ""}
         },
         icon: 'font-awesome/fa-heartbeat',
         inputs:0,
@@ -768,6 +772,15 @@
                 if (this.outputs !== outs) {
                     $("#node-input-outputs").val(outs);
                 }
+
+                // To prepare the trigger feedback!
+                let lbl = this._def.label.call(this);
+                // let lbl = this._def.label();
+                if (lbl.length > 30) {
+                    lbl = lbl.substring(0, 50) + "...";
+                }
+                lbl = lbl.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                $("#node-input-triggerLabel").val(lbl);
             }
         },
         button: {
