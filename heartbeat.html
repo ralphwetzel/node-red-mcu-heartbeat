@@ -349,6 +349,11 @@
         inputs:0,
         outputs:1,
         outputLabels: function(index) {
+
+            if (index == 1) {
+                return "Flow launch signal";
+            }
+
             var lab = '';
 
             // if only payload and topic - display payload type
