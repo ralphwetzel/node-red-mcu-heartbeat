@@ -800,8 +800,7 @@
                 }
 
                 // To prepare the trigger feedback!
-                let lbl = this._def.label.call(this);
-                // let lbl = this._def.label();
+                let lbl = this._def.label.call(this, getProps(items)?.props);
                 if (lbl.length > 30) {
                     lbl = lbl.substring(0, 50) + "...";
                 }
