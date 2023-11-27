@@ -200,6 +200,19 @@
         }
     }
     
+    // We cannot influence the text color when the node is displayed in the flow library.
+    // There, the text color is always black - which is looking bad for the MicroMagix theme.
+    // Thus we define a different node background color @ registerType (to please the library)
+    // and inject a small patch here to change to our desired node background color!
+    // The label color finally is set with an additional class @ labelStyle.
+    let gNC = RED.utils.getNodeColor;
+    RED.utils.getNodeColor = function(type, def) {
+        if (type == "mcu-heartbeat") {
+            return "#505050";
+        }
+        return gNC(type, def);
+    }
+
     function resizeDialog(size) {
         size = size || { height: $(".red-ui-tray-content form").height() }
         var rows = $("#dialog-form>div:not(.node-input-property-container-row):visible");
@@ -270,8 +283,8 @@
         });
     }
     RED.nodes.registerType('mcu-heartbeat',{
-        category: 'MCU',
-        color:"#7090c9",
+        color: "#C0C0C0",   // only for the flow library
+        category: 'MicroMagix',
         defaults: {
             name: {value:""},
             props:{value:[{p:"payload"},{p:"topic",vt:"str"}], validate:function(v, opt) {
@@ -424,7 +437,11 @@
         },
         paletteLabel: "heartbeat",
         labelStyle: function() {
-            return this.name?"node_label_italic":"";
+            let style = ["heartbeat_label_style"];
+            if (this.name) {
+                style.push("node_label_italic")
+            }
+            return style.join(" ");
         },
         oneditprepare: function() {
             var node = this;
@@ -853,7 +870,15 @@
             this.status = heartbeat_status.idle;
 
         },
-        oneditresize: resizeDialog
+        oneditresize: resizeDialog,
+
+        // micromagix theme
+        onpaletteadd: function(def) {
+            let pn = $(".red-ui-palette-node[data-palette-type='"+this.type+"']");
+            pn?.find(".red-ui-palette-label")?.css({"color": "salmon"});
+
+        },
+        // labelStyle: "heartbeat_label_style"
     });
 
     // RED.events.on('nodes:add', function(n) {
