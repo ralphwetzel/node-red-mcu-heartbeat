@@ -17,7 +17,7 @@ module.exports = function(RED) {
         // necessary to initialize status in editor
         // all following updates are done by the MCU & processed on client side!
         node.status({
-            text: "idle",
+            text: "Not connected",
             shape: "ring",
             fill: "grey"
         });

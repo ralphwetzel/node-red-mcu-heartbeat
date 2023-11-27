@@ -15,6 +15,7 @@ class mcuHeartbeat extends Node {
         super.onStart(config);
         
         let self = this;
+        self.shape = false;
 
         // enable heartbeat signal
         if (config.heartbeat === true) {
@@ -72,7 +73,8 @@ class mcuHeartbeat extends Node {
       }
 
     ping() {
-        this.status({ "fill": "green", "shape": "dot", "text": "connected" });
+        this.shape = !this.shape;
+        this.status({ "fill": "green", "shape": this.shape ? "dot" : "ring", "text": "MCU active" });
     }
 
 }

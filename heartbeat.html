@@ -193,17 +193,17 @@
 
     const heartbeat_status = {
         idle: {
-            text: "idle",
+            text: "Not connected",
             shape: "ring",
             fill: "grey"
         },
-        connected: {
-            text: "connected",
-            shape: "dot",
-            fill: "green"
-        },
+        // connected: {
+        //     text: "connected",
+        //     shape: "dot",
+        //     fill: "green"
+        // },
         lost: {
-            text: "disconnected",
+            text: "MCU signal lost",
             shape: "dot",
             fill: "red"
         }
@@ -876,7 +876,6 @@
         onadd: function() {
             this.connected = false;
             this.status = heartbeat_status.idle;
-
         },
         oneditresize: resizeDialog,
 
@@ -884,7 +883,6 @@
         onpaletteadd: function(def) {
             let pn = $(".red-ui-palette-node[data-palette-type='"+this.type+"']");
             pn?.find(".red-ui-palette-label")?.css({"color": "salmon"});
-
         },
         // labelStyle: "heartbeat_label_style"
     });
